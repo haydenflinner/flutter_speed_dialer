@@ -2,6 +2,9 @@
 
 A FAB Speed Dialer for flutter that actually works.
 
+Taken verbatim from Collin Jackson's StackOverflow [post](https://stackoverflow.com/a/46480722).
+
+![Demo gif](/recording.gif/)
 
 ## Getting Started
 
