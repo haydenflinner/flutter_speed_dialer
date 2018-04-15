@@ -12,8 +12,12 @@ class SpeedDialerButton extends StatelessWidget {
   Color backgroundColor;
   Function onPressed;
 
-  SpeedDialerButton({this.icon, this.text, this.foregroundColor, this.backgroundColor,
-    this.onPressed});
+  SpeedDialerButton(
+      {this.icon,
+      this.text,
+      this.foregroundColor,
+      this.backgroundColor,
+      this.onPressed});
 
   @override
   build(BuildContext context) {
@@ -24,7 +28,6 @@ class SpeedDialerButton extends StatelessWidget {
       onPressed: onPressed,
     );
   }
-
 }
 
 /// A FAB Speed Dialer that pops out buttons of your choice.
@@ -33,14 +36,21 @@ class SpeedDialerButton extends StatelessWidget {
 class SpeedDialer extends StatefulWidget {
   /// Buttons that pop out upon tapping the FAB.
   List<Widget> children;
+  IconData opened;
+  IconData closed;
+  Color backgroundColor;
 
-  SpeedDialer({this.children});
+  /// Close the speed dialer when a button is touched.
+  bool closeOnSelect;
+
+  SpeedDialer({this.children, this.opened, this.closed, this.backgroundColor, this.closeOnSelect=true});
 
   @override
   State createState() => new SpeedDialerState();
 }
 
-class SpeedDialerState extends State<SpeedDialer> with TickerProviderStateMixin {
+class SpeedDialerState extends State<SpeedDialer>
+    with TickerProviderStateMixin {
   AnimationController _controller;
 
   @override
@@ -51,10 +61,34 @@ class SpeedDialerState extends State<SpeedDialer> with TickerProviderStateMixin 
     );
   }
 
+  toggleOpen() {
+    if (_controller.isDismissed) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  closingWrap(Function func) {
+    return () {
+      if (widget.closeOnSelect) {
+        toggleOpen();
+      }
+      if (func != null) func();
+    };
+  }
+
   Widget build(BuildContext context) {
-    Color backgroundColor = Theme.of(context).cardColor;
+    Color backgroundColor =
+        widget.backgroundColor ?? Theme.of(context).cardColor;
     Color foregroundColor = Theme.of(context).accentColor;
-    var children = widget.children ?? [];
+    var tempChildren = widget.children ?? [];
+    var children = tempChildren.map((Widget w) {
+      if (w is SpeedDialerButton) {
+        w.onPressed = closingWrap(w.onPressed);
+      }
+      return w;
+    }).toList();
     return new Column(
       mainAxisSize: MainAxisSize.min,
       children: new List.generate(children.length, (int index) {
@@ -65,38 +99,32 @@ class SpeedDialerState extends State<SpeedDialer> with TickerProviderStateMixin 
           child: new ScaleTransition(
             scale: new CurvedAnimation(
               parent: _controller,
-              curve: new Interval(
-                  0.0,
-                  1.0 - index / children.length / 2.0,
-                  curve: Curves.easeOut
-              ),
+              curve: new Interval(0.0, 1.0 - index / children.length / 2.0,
+                  curve: Curves.easeOut),
             ),
             child: children[index],
           ),
         );
         return child;
-      }).toList()..add(
-        // TODO: Support customization of this button.
-        new FloatingActionButton(
-          child: new AnimatedBuilder(
-            animation: _controller,
-            builder: (BuildContext context, Widget child) {
-              return new Transform(
-                transform: new Matrix4.rotationZ(_controller.value * 0.5 * math.PI),
-                alignment: FractionalOffset.center,
-                child: new Icon(_controller.isDismissed ? Icons.menu : Icons.close),
-              );
-            },
-          ),
-          onPressed: () {
-            if (_controller.isDismissed) {
-              _controller.forward();
-            } else {
-              _controller.reverse();
-            }
-          },
-        ),
-      ),
+      }).toList()
+        ..add(
+            // TODO: Support customization of this button.
+            new FloatingActionButton(
+                backgroundColor: backgroundColor,
+                child: new AnimatedBuilder(
+                  animation: _controller,
+                  builder: (BuildContext context, Widget child) {
+                    return new Transform(
+                      transform: new Matrix4.rotationZ(
+                          _controller.value * 0.5 * math.PI),
+                      alignment: FractionalOffset.center,
+                      child: new Icon(_controller.isDismissed
+                          ? widget.closed ?? Icons.menu
+                          : widget.opened ?? Icons.close),
+                    );
+                  },
+                ),
+                onPressed: toggleOpen)),
     );
   }
 }
