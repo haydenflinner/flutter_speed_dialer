@@ -1,6 +1,5 @@
 library flutter_speed_dialer;
 
-
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
@@ -39,11 +38,18 @@ class SpeedDialer extends StatefulWidget {
   IconData opened;
   IconData closed;
   Color backgroundColor;
+  Duration duration;
 
   /// Close the speed dialer when a button is touched.
   bool closeOnSelect;
 
-  SpeedDialer({this.children, this.opened, this.closed, this.backgroundColor, this.closeOnSelect=true});
+  SpeedDialer(
+      {this.children,
+      this.opened,
+      this.closed,
+      this.backgroundColor,
+      this.closeOnSelect = true,
+      this.duration = const Duration(milliseconds: 150)});
 
   @override
   State createState() => new SpeedDialerState();
@@ -57,7 +63,7 @@ class SpeedDialerState extends State<SpeedDialer>
   void initState() {
     _controller = new AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: widget.duration,
     );
   }
 
