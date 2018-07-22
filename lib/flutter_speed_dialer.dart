@@ -4,19 +4,23 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 /// Button tailored to using with [SpeedDialer].
+///
+/// Possiblely needs to have a hero tag different from buttons popped out
 class SpeedDialerButton extends StatelessWidget {
   IconData icon;
   String text;
   Color foregroundColor;
   Color backgroundColor;
   Function onPressed;
+  Object mainButtonHeroTag;
 
   SpeedDialerButton(
       {this.icon,
       this.text,
       this.foregroundColor,
       this.backgroundColor,
-      this.onPressed});
+      this.onPressed,
+      this.mainButtonHeroTag = 'mainFAB'});
 
   @override
   build(BuildContext context) {
@@ -25,6 +29,7 @@ class SpeedDialerButton extends StatelessWidget {
       mini: true,
       child: new Icon(icon, color: foregroundColor),
       onPressed: onPressed,
+      heroTag: this.mainButtonHeroTag,
     );
   }
 }
